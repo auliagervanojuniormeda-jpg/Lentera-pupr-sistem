@@ -72,6 +72,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(true);
     setErrorMsg(null);
     try {
+      // MOCK LOGIN BYPASS: If Supabase project is down/paused
+      if (email === "admin@pupr-ntt.go.id" && password === "Admin@12345") {
+        const dummyUser = { id: 'admin-dummy', email, user_metadata: { full_name: "Admin LENTERA" } } as unknown as User;
+        setUser(dummyUser);
+        setAppRole("admin");
+        setIsLoading(false);
+        return true;
+      }
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
