@@ -19,6 +19,7 @@ import { UtilityRequests } from "./components/UtilityRequests";
 import { AuthScreen } from "./components/AuthScreen";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import {
+  FileText,
   LayoutDashboard,
   Map,
   Table,

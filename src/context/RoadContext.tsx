@@ -6,7 +6,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { RoadSegment, RoadCondition, SurfaceType, MaintenanceActivity, LegerDocument, GuidelineDocument } from "../types";
 import { supabase } from "../lib/supabase";
-import { DISTRICT_LIST, KECAMATAN_MAP } from "../data/initialData";
+import { DISTRICT_LIST, KECAMATAN_MAP, INITIAL_ROAD_SEGMENTS } from "../data/initialData";
 
 // ─── DB Row → Frontend Type Mappers ──────────────────────────────────────────
 

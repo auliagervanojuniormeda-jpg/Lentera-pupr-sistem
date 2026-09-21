@@ -30,6 +30,7 @@ export const UtilityRequests: React.FC = () => {
   const [requests, setRequests] = useState<UtilityRequest[]>(MOCK_REQUESTS);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
+  const [file, setFile] = useState<File | null>(null);
   const [form, setForm] = useState<Partial<UtilityRequest>>({
     utilityType: "Listrik (PLN)",
     status: "Pending"
@@ -43,8 +44,8 @@ export const UtilityRequests: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.providerName || !form.letterNumber || !form.segmentId || !form.letterDate) {
-      alert("Harap lengkapi semua field wajib.");
+    if (!form.providerName || !form.letterNumber || !form.segmentId || !form.letterDate || !file) {
+      alert("Harap lengkapi semua field wajib dan unggah dokumen surat.");
       return;
     }
     const newReq: UtilityRequest = {
@@ -62,6 +63,7 @@ export const UtilityRequests: React.FC = () => {
     setRequests([newReq, ...requests]);
     setShowModal(false);
     setForm({ utilityType: "Listrik (PLN)", status: "Pending" });
+    setFile(null);
   };
 
   return (
@@ -260,12 +262,24 @@ export const UtilityRequests: React.FC = () => {
                  <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-2">
                     Upload Surat (PDF)
                   </label>
-                  <div className="border-2 border-dashed border-primary/40 rounded-xl p-6 text-center hover:bg-primary-container/20 transition-colors cursor-pointer group">
+                  <div className="relative border-2 border-dashed border-primary/40 rounded-xl p-6 text-center hover:bg-primary-container/20 transition-colors cursor-pointer group">
+                    <input 
+                      type="file" 
+                      accept=".pdf"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files[0]) {
+                          setFile(e.target.files[0]);
+                        }
+                      }}
+                      className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    />
                     <UploadCloud className="w-8 h-8 mx-auto text-primary/60 group-hover:text-primary transition-colors mb-3" />
                     <p className="text-sm font-semibold text-primary">
-                      Klik atau drag file PDF ke sini
+                      {file ? file.name : "Klik atau drag file PDF ke sini"}
                     </p>
-                    <p className="text-xs text-on-surface-variant mt-1">Maks. 5MB</p>
+                    <p className="text-xs text-on-surface-variant mt-1">
+                      {file ? `${(file.size / 1024 / 1024).toFixed(2)} MB` : "Maks. 5MB"}
+                    </p>
                   </div>
               </div>
             </form>
@@ -273,7 +287,10 @@ export const UtilityRequests: React.FC = () => {
             <div className="p-5 border-t border-outline-variant bg-surface-container-lowest flex justify-end gap-3 shrink-0">
               <button
                 type="button"
-                onClick={() => setShowModal(false)}
+                onClick={() => {
+                  setShowModal(false);
+                  setFile(null);
+                }}
                 className="px-5 py-2.5 rounded-xl font-label-lg font-bold text-on-surface-variant hover:bg-surface-container-high transition-colors"
               >
                 Batal
