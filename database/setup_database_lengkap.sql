@@ -24,7 +24,7 @@ BEGIN
   FOR tbl IN VALUES
     ('users'), ('road_segments'), ('leger_documents'),
     ('maintenance_activities'), ('audit_logs'),
-    ('districts'), ('sub_districts'), ('guidelines'), ('system_settings')
+    ('districts'), ('sub_districts'), ('guidelines'), ('system_settings'), ('utility_requests')
   LOOP
     FOR pol IN
       SELECT policyname FROM pg_policies
@@ -220,6 +220,21 @@ CREATE TABLE IF NOT EXISTS public.guidelines (
     created_at   timestamptz DEFAULT now()
 );
 
+-- 1j. Tabel Pengajuan Utilitas
+CREATE TABLE IF NOT EXISTS public.utility_requests (
+    id             uuid    PRIMARY KEY DEFAULT gen_random_uuid(),
+    provider_name  text    NOT NULL,
+    utility_type   text    NOT NULL,
+    segment_id     text    NOT NULL,
+    letter_number  text    NOT NULL,
+    letter_date    date    NOT NULL,
+    document_url   text,
+    status         text    NOT NULL CHECK (status IN ('Pending', 'Disetujui', 'Ditolak')),
+    notes          text,
+    uploaded_by    uuid    REFERENCES public.users(id) ON DELETE SET NULL,
+    uploaded_at    timestamptz DEFAULT now()
+);
+
 
 -- ============================================================
 -- BAGIAN 2: TRIGGER & HELPER FUNCTIONS
@@ -327,6 +342,7 @@ ALTER TABLE public.districts              ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.sub_districts          ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.guidelines             ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.system_settings        ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.utility_requests       ENABLE ROW LEVEL SECURITY;
 
 -- 3a. Policies untuk public.users
 CREATE POLICY "Authenticated dapat baca semua profil"
@@ -412,6 +428,21 @@ CREATE POLICY "Semua user bisa baca system_settings"
 
 CREATE POLICY "Admin bisa update system_settings"
     ON public.system_settings FOR UPDATE USING (public.is_admin());
+
+-- 3i. Policies untuk public.utility_requests
+CREATE POLICY "Semua user bisa baca utility_requests"
+    ON public.utility_requests FOR SELECT USING (auth.role() = 'authenticated');
+
+CREATE POLICY "Semua user bisa tambah utility_requests"
+    ON public.utility_requests FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+
+CREATE POLICY "User bisa delete utility_requests miliknya atau Admin"
+    ON public.utility_requests FOR DELETE
+    USING (uploaded_by = auth.uid() OR public.is_admin());
+
+CREATE POLICY "User bisa update utility_requests miliknya atau Admin"
+    ON public.utility_requests FOR UPDATE
+    USING (uploaded_by = auth.uid() OR public.is_admin());
 
 
 -- ============================================================

@@ -15,6 +15,7 @@ import { LegerDocuments } from "./components/LegerDocuments";
 import { Guidelines } from "./components/Guidelines";
 import { UserManagement } from "./components/UserManagement";
 import { UtilitiesManagement } from "./components/UtilitiesManagement";
+import { UtilityRequests } from "./components/UtilityRequests";
 import { AuthScreen } from "./components/AuthScreen";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 import {
@@ -197,6 +198,7 @@ function LenteraAppContent({ onLogout }: { onLogout: () => void }) {
       items: [
         { id: "survey", label: "Input/Survey", icon: <FileEdit className="w-5 h-5 shrink-0" /> },
         { id: "utilities", label: "Utilitas", icon: <Wrench className="w-5 h-5 shrink-0" /> },
+        { id: "utility_requests", label: "Pengajuan Utilitas", icon: <FileText className="w-5 h-5 shrink-0" /> },
         { id: "reports", label: "Reports", icon: <BarChart3 className="w-5 h-5 shrink-0" /> },
         { id: "users", label: "Manajemen User", icon: <Users className="w-5 h-5 shrink-0" /> },
       ],
@@ -499,6 +501,7 @@ function LenteraAppContent({ onLogout }: { onLogout: () => void }) {
           {activeTab === "data" && <LegerData />}
           {activeTab === "survey" && <InputSurvey />}
           {activeTab === "utilities" && <UtilitiesManagement />}
+          {activeTab === "utility_requests" && <UtilityRequests />}
           {activeTab === "documents" && <LegerDocuments />}
           {activeTab === "guidelines" && <Guidelines />}
           {activeTab === "reports" && <Reports />}

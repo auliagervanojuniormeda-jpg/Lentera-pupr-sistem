@@ -132,3 +132,17 @@ export interface UtilityRetributionItem {
   notes?: string;
 }
 
+export interface UtilityRequest {
+  id: string;
+  providerName: string;
+  utilityType: UtilityType;
+  segmentId: string;
+  segmentName?: string;
+  letterNumber: string;
+  letterDate: string;
+  documentUrl?: string;
+  status: "Pending" | "Disetujui" | "Ditolak";
+  notes?: string;
+  uploadedBy?: string;
+  uploadedAt: string;
+}
