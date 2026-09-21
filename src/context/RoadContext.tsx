@@ -209,7 +209,7 @@ export const RoadProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error("[LENTERA] Segments fetch error:", segRes.error.message);
       hasError = true;
       // FALLBACK TO MOCK DATA IF DB FAILS
-      setSegments(INITIAL_ROAD_SEGMENTS);
+      setSegments(INITIAL_ROAD_SEGMENTS || []);
     } else {
       setSegments((segRes.data ?? []).map(mapDbToSegment));
     }
