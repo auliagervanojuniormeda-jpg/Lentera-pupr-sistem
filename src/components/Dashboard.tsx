@@ -24,7 +24,7 @@ import {
 import { useAuth } from "../context/AuthContext";
 
 export const Dashboard: React.FC = () => {
-  const { segments, activities, addActivity, setActiveTab, deleteSegment, showToast } = useRoads();
+  const { segments, activities, addActivity, setActiveTab, deleteSegment, addSegment, updateSegment, showToast } = useRoads();
   const { appRole } = useAuth();
   const isAdmin = appRole === "admin";
 
@@ -33,6 +33,55 @@ export const Dashboard: React.FC = () => {
   const [activityTitle, setActivityTitle] = useState("");
   const [activityDesc, setActivityDesc] = useState("");
   const [activityType, setActivityType] = useState<"construction" | "survey" | "task_alt">("construction");
+
+  // State for add segment modal
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newSegCode, setNewSegCode] = useState("");
+  const [newSegName, setNewSegName] = useState("");
+  const [newSegDistrict, setNewSegDistrict] = useState("");
+  const [newSegLength, setNewSegLength] = useState("");
+  const [newSegCondition, setNewSegCondition] = useState<RoadCondition>(RoadCondition.MANTAP);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAddSegmentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSegCode || !newSegName || !newSegDistrict || !newSegLength) {
+      showToast("Harap isi semua bidang wajib", "error");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    try {
+      await addSegment({
+        code: newSegCode,
+        name: newSegName,
+        district: newSegDistrict,
+        kecamatan: "Tidak diketahui",
+        lengthKm: parseFloat(newSegLength),
+        widthM: 6.0,
+        surfaceType: "Aspal",
+        condition: newSegCondition,
+        constYear: new Date().getFullYear(),
+        startLat: 0,
+        startLng: 0,
+        endLat: 0,
+        endLng: 0,
+        description: "Ditambahkan secara manual",
+        surveyor: "Sistem Admin"
+      });
+      showToast("Ruas jalan berhasil ditambahkan!", "success");
+      setShowAddModal(false);
+      // Reset form
+      setNewSegCode("");
+      setNewSegName("");
+      setNewSegDistrict("");
+      setNewSegLength("");
+    } catch (err: any) {
+      showToast("Gagal menambahkan ruas jalan: " + err.message, "error");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   // Dynamic statistics calculations
   const stats = useMemo(() => {
@@ -125,6 +174,16 @@ export const Dashboard: React.FC = () => {
           </p>
         </div>
         <div className="flex flex-row gap-2.5 sm:gap-3 w-full md:w-auto">
+          {isAdmin && (
+            <button
+              onClick={() => setShowAddModal(true)}
+              className="flex-1 md:flex-none bg-tertiary text-on-tertiary px-3 sm:px-5 py-2.5 md:py-2 rounded font-label-md text-label-md flex items-center justify-center gap-2 hover:bg-tertiary-container transition-colors shadow-sm whitespace-nowrap"
+            >
+              <Plus className="w-4 h-4 shrink-0" />
+              <span className="sm:hidden">Tambah</span>
+              <span className="hidden sm:inline">Tambah Ruas</span>
+            </button>
+          )}
           <button
             onClick={() => setActiveTab("map")}
             className="flex-1 md:flex-none bg-surface-container border border-outline-variant px-3 sm:px-4 py-2.5 md:py-2 rounded font-label-md text-label-md text-on-surface flex items-center justify-center gap-2 hover:bg-surface-container-high transition-colors whitespace-nowrap"
@@ -355,9 +414,28 @@ export const Dashboard: React.FC = () => {
                         {seg.lengthKm.toLocaleString("id-ID")}
                       </td>
                       <td className="p-3 sm:p-4 text-center">
-                        <span className={`inline-block px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${badgeColors}`}>
-                          {seg.condition}
-                        </span>
+                        {isAdmin ? (
+                          <select 
+                            value={seg.condition}
+                            onChange={(e) => {
+                              showToast("Menyimpan perubahan kondisi...", "info");
+                              updateSegment(seg.id, { condition: e.target.value as RoadCondition })
+                                .then(() => showToast(`Kondisi ${seg.name} diperbarui`, "success"))
+                                .catch(err => showToast("Gagal menyimpan: " + err.message, "error"));
+                            }}
+                            className={`inline-block px-2 py-1 rounded text-xs font-bold whitespace-nowrap outline-none cursor-pointer hover:brightness-95 transition-all appearance-none text-center ${badgeColors}`}
+                            style={{ textAlignLast: 'center' }}
+                          >
+                            <option value={RoadCondition.MANTAP}>Mantap</option>
+                            <option value={RoadCondition.SEDANG}>Sedang</option>
+                            <option value={RoadCondition.RUSAK_RINGAN}>Rusak Ringan</option>
+                            <option value={RoadCondition.RUSAK_BERAT}>Rusak Berat</option>
+                          </select>
+                        ) : (
+                          <span className={`inline-block px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${badgeColors}`}>
+                            {seg.condition}
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );
@@ -525,6 +603,103 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Add Segment Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+          <div className="bg-surface-container-lowest rounded-2xl shadow-xl w-full max-w-lg overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div className="px-6 py-4 border-b border-outline-variant bg-surface-container-low/50 flex justify-between items-center">
+              <h3 className="font-title-lg text-title-lg text-on-surface">Tambah Ruas Jalan Manual</h3>
+              <button onClick={() => setShowAddModal(false)} className="text-on-surface-variant hover:bg-surface-container rounded-full p-2">
+                <Trash2 className="w-5 h-5" />
+              </button>
+            </div>
+            
+            <form onSubmit={handleAddSegmentSubmit} className="p-6 space-y-4">
+              <div>
+                <label className="block text-body-sm font-medium text-on-surface mb-1">Kode Ruas <span className="text-error">*</span></label>
+                <input
+                  type="text"
+                  required
+                  value={newSegCode}
+                  onChange={(e) => setNewSegCode(e.target.value)}
+                  className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  placeholder="e.g. 53.01.001.X"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-body-sm font-medium text-on-surface mb-1">Nama Ruas <span className="text-error">*</span></label>
+                <input
+                  type="text"
+                  required
+                  value={newSegName}
+                  onChange={(e) => setNewSegName(e.target.value)}
+                  className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                  placeholder="e.g. Jl. Ahmad Yani"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-body-sm font-medium text-on-surface mb-1">Kabupaten/Kota <span className="text-error">*</span></label>
+                  <input
+                    type="text"
+                    required
+                    value={newSegDistrict}
+                    onChange={(e) => setNewSegDistrict(e.target.value)}
+                    className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    placeholder="e.g. Kota Kupang"
+                  />
+                </div>
+                <div>
+                  <label className="block text-body-sm font-medium text-on-surface mb-1">Panjang (KM) <span className="text-error">*</span></label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    required
+                    value={newSegLength}
+                    onChange={(e) => setNewSegLength(e.target.value)}
+                    className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                    placeholder="e.g. 10.5"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-body-sm font-medium text-on-surface mb-1">Kondisi Jalan</label>
+                <select
+                  value={newSegCondition}
+                  onChange={(e) => setNewSegCondition(e.target.value as RoadCondition)}
+                  className="w-full bg-surface-container border border-outline-variant rounded-lg px-3 py-2 text-body-md text-on-surface focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary"
+                >
+                  <option value={RoadCondition.MANTAP}>Baik (Mantap)</option>
+                  <option value={RoadCondition.SEDANG}>Sedang</option>
+                  <option value={RoadCondition.RUSAK_RINGAN}>Rusak Ringan</option>
+                  <option value={RoadCondition.RUSAK_BERAT}>Rusak Berat</option>
+                </select>
+              </div>
+
+              <div className="pt-4 flex justify-end gap-3 border-t border-outline-variant mt-6">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 border border-outline-variant rounded-lg text-label-md font-bold text-on-surface hover:bg-surface-container-high transition-colors"
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="px-4 py-2 bg-primary text-on-primary rounded-lg text-label-md font-bold hover:bg-primary/90 transition-colors flex items-center gap-2 disabled:opacity-70"
+                >
+                  {isSubmitting ? "Menyimpan..." : "Simpan Ruas"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 };

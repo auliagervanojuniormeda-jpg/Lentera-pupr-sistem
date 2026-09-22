@@ -8,7 +8,7 @@ import { useAuth } from "../context/AuthContext";
 import { useRoads } from "../context/RoadContext";
 import { UtilityRequest, UtilityType } from "../types";
 import {
-  FileText, Plus, UploadCloud, Search, X, Check, XCircle, CheckCircle2, Clock
+  FileText, Plus, UploadCloud, Search, X, Check, XCircle, CheckCircle2, Clock, Trash2
 } from "lucide-react";
 
 const MOCK_REQUESTS: UtilityRequest[] = [
@@ -22,7 +22,8 @@ const MOCK_REQUESTS: UtilityRequest[] = [
     letterDate: "2026-09-10",
     status: "Pending",
     uploadedBy: "Budi Santoso",
-    uploadedAt: "2026-09-15 10:00 WITA"
+    uploadedAt: "2026-09-15 10:00 WITA",
+    documentUrl: "surat_pengajuan_pln.pdf"
   }
 ];
 
@@ -44,6 +45,12 @@ export const UtilityRequests: React.FC = () => {
       req.letterNumber.toLowerCase().includes(search.toLowerCase())
   );
 
+  const handleDeleteDocument = (reqId: string) => {
+    if (window.confirm("Yakin ingin menghapus dokumen dari pengajuan ini?")) {
+      setRequests(requests.map(req => req.id === reqId ? { ...req, documentUrl: undefined } : req));
+    }
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.providerName || !form.letterNumber || !form.segmentId || !form.letterDate || !file) {
@@ -58,9 +65,10 @@ export const UtilityRequests: React.FC = () => {
       segmentName: "Ruas " + form.segmentId,
       letterNumber: form.letterNumber,
       letterDate: form.letterDate,
-      status: "Pending",
-      uploadedBy: "Current User",
-      uploadedAt: new Date().toLocaleString("id-ID") + " WITA"
+      status: form.status as any,
+      uploadedAt: new Date().toLocaleString("id-ID") + " WITA",
+      uploadedBy: "User Sistem",
+      documentUrl: file.name
     };
     setRequests([newReq, ...requests]);
     setShowModal(false);
@@ -152,9 +160,26 @@ export const UtilityRequests: React.FC = () => {
                     </div>
                   </td>
                   <td className="p-4">
-                    <button className="text-primary hover:underline font-semibold text-xs flex items-center gap-1">
-                      <FileText className="w-4 h-4" /> Lihat Dokumen
-                    </button>
+                    <div className="flex items-center gap-3">
+                      {req.documentUrl ? (
+                        <>
+                          <button className="text-primary hover:underline font-semibold text-xs flex items-center gap-1">
+                            <FileText className="w-4 h-4" /> Lihat Dokumen
+                          </button>
+                          {appRole === "admin" && (
+                            <button 
+                              onClick={() => handleDeleteDocument(req.id)}
+                              className="text-error hover:underline font-semibold text-xs flex items-center gap-1"
+                              title="Hapus Dokumen"
+                            >
+                              <Trash2 className="w-4 h-4" /> Hapus
+                            </button>
+                          )}
+                        </>
+                      ) : (
+                        <span className="text-xs text-on-surface-variant italic">Tidak ada dokumen</span>
+                      )}
+                    </div>
                   </td>
                 </tr>
               ))}
