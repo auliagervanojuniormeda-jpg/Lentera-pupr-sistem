@@ -5,6 +5,7 @@
 
 import React, { useState } from "react";
 import { useAuth } from "../context/AuthContext";
+import { useRoads } from "../context/RoadContext";
 import { UtilityRequest, UtilityType } from "../types";
 import {
   FileText, Plus, UploadCloud, Search, X, Check, XCircle, CheckCircle2, Clock
@@ -27,6 +28,7 @@ const MOCK_REQUESTS: UtilityRequest[] = [
 
 export const UtilityRequests: React.FC = () => {
   const { appRole } = useAuth();
+  const { segments } = useRoads();
   const [requests, setRequests] = useState<UtilityRequest[]>(MOCK_REQUESTS);
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -220,14 +222,19 @@ export const UtilityRequests: React.FC = () => {
                   <label className="block text-xs font-bold text-on-surface-variant uppercase tracking-wider mb-1.5">
                     ID Ruas
                   </label>
-                  <input
+                  <select
                     required
-                    type="text"
                     value={form.segmentId || ""}
                     onChange={(e) => setForm({ ...form, segmentId: e.target.value })}
                     className="w-full px-4 py-2.5 bg-surface-container-low border border-outline-variant rounded-xl text-sm focus:ring-2 focus:ring-primary focus:border-transparent transition-all"
-                    placeholder="ID Ruas Jalan"
-                  />
+                  >
+                    <option value="" disabled>Pilih Ruas Jalan...</option>
+                    {segments.map((seg) => (
+                      <option key={seg.id} value={seg.id}>
+                        {seg.name} ({seg.code}) - {seg.district}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 <div className="col-span-2 sm:col-span-1">

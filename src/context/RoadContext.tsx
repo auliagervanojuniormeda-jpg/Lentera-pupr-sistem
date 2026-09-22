@@ -211,7 +211,15 @@ export const RoadProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // FALLBACK TO MOCK DATA IF DB FAILS
       setSegments(INITIAL_ROAD_SEGMENTS || []);
     } else {
-      setSegments((segRes.data ?? []).map(mapDbToSegment));
+      const dbSegments = (segRes.data ?? []).map(mapDbToSegment);
+      // Automatically merge the 111 official roads if they are not yet in the DB
+      const merged = [...dbSegments];
+      for (const initial of INITIAL_ROAD_SEGMENTS) {
+        if (!merged.find(s => s.code === initial.code)) {
+          merged.push(initial);
+        }
+      }
+      setSegments(merged);
     }
 
     if (actRes.error) {

@@ -313,6 +313,60 @@ export const Dashboard: React.FC = () => {
           </div>
         </div>
 
+        {/* Daftar Seluruh Ruas Jalan Panel */}
+        <div className="col-span-1 md:col-span-12 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl flex flex-col shadow-sm overflow-hidden mt-6">
+          <div className="p-5 sm:p-6 border-b border-outline-variant/60 flex justify-between items-center bg-surface-container-low/50">
+            <div>
+              <h3 className="font-label-lg text-label-lg text-on-surface uppercase tracking-wider flex items-center gap-2">
+                <Milestone className="w-5 h-5 text-primary" />
+                Daftar Seluruh Ruas Jalan Provinsi
+              </h3>
+              <p className="text-body-sm text-on-surface-variant mt-1">
+                Total Panjang Keseluruhan: <strong className="text-on-surface">{stats.totalLength.toLocaleString("id-ID")} KM</strong>
+              </p>
+            </div>
+          </div>
+          <div className="overflow-x-auto max-h-[500px] overflow-y-auto">
+            <table className="w-full text-left border-collapse text-sm">
+              <thead className="sticky top-0 bg-surface-container-low border-b border-outline-variant shadow-sm z-10">
+                <tr className="text-on-surface-variant font-label-sm uppercase tracking-wider">
+                  <th className="p-3 sm:p-4 font-bold w-16">No</th>
+                  <th className="p-3 sm:p-4 font-bold">Kode Ruas</th>
+                  <th className="p-3 sm:p-4 font-bold">Nama Ruas</th>
+                  <th className="p-3 sm:p-4 font-bold">Kabupaten/Kota</th>
+                  <th className="p-3 sm:p-4 font-bold text-right">Panjang (KM)</th>
+                  <th className="p-3 sm:p-4 font-bold text-center">Kondisi</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-outline-variant/40">
+                {segments.map((seg, index) => {
+                  let badgeColors = "bg-surface-container text-on-surface";
+                  if (seg.condition === RoadCondition.MANTAP) badgeColors = "bg-tertiary-container text-on-tertiary-container";
+                  else if (seg.condition === RoadCondition.SEDANG) badgeColors = "bg-secondary-container text-on-secondary-container";
+                  else badgeColors = "bg-error-container text-on-error-container";
+
+                  return (
+                    <tr key={seg.id} className="hover:bg-surface-container-low transition-colors">
+                      <td className="p-3 sm:p-4 text-on-surface-variant text-center">{index + 1}</td>
+                      <td className="p-3 sm:p-4 font-mono font-medium text-primary">{seg.code}</td>
+                      <td className="p-3 sm:p-4 font-semibold text-on-surface">{seg.name}</td>
+                      <td className="p-3 sm:p-4 text-on-surface-variant">{seg.district}</td>
+                      <td className="p-3 sm:p-4 text-right font-mono font-medium">
+                        {seg.lengthKm.toLocaleString("id-ID")}
+                      </td>
+                      <td className="p-3 sm:p-4 text-center">
+                        <span className={`inline-block px-2 py-1 rounded text-xs font-bold whitespace-nowrap ${badgeColors}`}>
+                          {seg.condition}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
         {/* Maintenance Activities Panel */}
         <div className="lg:col-span-1 bg-surface-container-lowest border border-outline-variant/60 rounded-2xl flex flex-col shadow-sm hover:shadow-md transition-shadow overflow-hidden">
           <div className="p-4 sm:p-6 border-b border-outline-variant bg-surface-bright flex justify-between items-center gap-2">
