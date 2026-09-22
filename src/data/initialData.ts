@@ -2273,16 +2273,50 @@ export const INITIAL_MAINTENANCE_ACTIVITIES: MaintenanceActivity[] = [
 
 export const DISTRICT_LIST = [
   "Kota Kupang",
+  "Kab. Kupang",
   "Kab. Timor Tengah Selatan",
+  "Kab. Timor Tengah Utara",
+  "Kab. Belu",
+  "Kab. Malaka",
+  "Kab. Rote Ndao",
+  "Kab. Sabu Raijua",
+  "Kab. Alor",
+  "Kab. Lembata",
+  "Kab. Flores Timur",
   "Kab. Sikka",
+  "Kab. Ende",
+  "Kab. Nagekeo",
+  "Kab. Ngada",
+  "Kab. Manggarai Timur",
+  "Kab. Manggarai",
   "Kab. Manggarai Barat",
-  "Kab. Ende"
+  "Kab. Sumba Timur",
+  "Kab. Sumba Tengah",
+  "Kab. Sumba Barat",
+  "Kab. Sumba Barat Daya"
 ];
 
 export const KECAMATAN_MAP: Record<string, string[]> = {
-  "Kota Kupang": ["Kec. Oebobo", "Kec. Kelapa Lima", "Kec. Maulafa", "Kec. Alak"],
-  "Kab. Timor Tengah Selatan": ["Kec. Soe", "Kec. Amanuban Barat", "Kec. Mollo Utara"],
-  "Kab. Sikka": ["Kec. Alok", "Kec. Maumere", "Kec. Kewapante", "Kec. Nita"],
-  "Kab. Manggarai Barat": ["Kec. Komodo", "Kec. Lembor", "Kec. Sano Nggoang"],
-  "Kab. Ende": ["Kec. Ende Selatan", "Kec. Ende Timur", "Kec. Detusoko"]
+  "Kota Kupang": ["Kec. Oebobo", "Kec. Kelapa Lima", "Kec. Maulafa", "Kec. Alak", "Kec. Pusat"],
+  "Kab. Kupang": ["Kec. Pusat"],
+  "Kab. Timor Tengah Selatan": ["Kec. Soe", "Kec. Amanuban Barat", "Kec. Mollo Utara", "Kec. Pusat"],
+  "Kab. Timor Tengah Utara": ["Kec. Pusat"],
+  "Kab. Belu": ["Kec. Pusat"],
+  "Kab. Malaka": ["Kec. Pusat"],
+  "Kab. Rote Ndao": ["Kec. Pusat"],
+  "Kab. Sabu Raijua": ["Kec. Pusat"],
+  "Kab. Alor": ["Kec. Pusat"],
+  "Kab. Lembata": ["Kec. Pusat"],
+  "Kab. Flores Timur": ["Kec. Pusat"],
+  "Kab. Sikka": ["Kec. Alok", "Kec. Maumere", "Kec. Kewapante", "Kec. Nita", "Kec. Pusat"],
+  "Kab. Ende": ["Kec. Ende Selatan", "Kec. Ende Timur", "Kec. Detusoko", "Kec. Pusat"],
+  "Kab. Nagekeo": ["Kec. Pusat"],
+  "Kab. Ngada": ["Kec. Pusat"],
+  "Kab. Manggarai Timur": ["Kec. Pusat"],
+  "Kab. Manggarai": ["Kec. Pusat"],
+  "Kab. Manggarai Barat": ["Kec. Komodo", "Kec. Lembor", "Kec. Sano Nggoang", "Kec. Pusat"],
+  "Kab. Sumba Timur": ["Kec. Pusat"],
+  "Kab. Sumba Tengah": ["Kec. Pusat"],
+  "Kab. Sumba Barat": ["Kec. Pusat"],
+  "Kab. Sumba Barat Daya": ["Kec. Pusat"]
 };
