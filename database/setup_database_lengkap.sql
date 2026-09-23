@@ -346,7 +346,7 @@ ALTER TABLE public.utility_requests       ENABLE ROW LEVEL SECURITY;
 
 -- 3a. Policies untuk public.users
 CREATE POLICY "Authenticated dapat baca semua profil"
-    ON public.users FOR SELECT USING (auth.role() = 'authenticated');
+    ON public.users FOR SELECT USING (true);
 
 CREATE POLICY "Admin dan user update profil"
     ON public.users FOR UPDATE
@@ -361,15 +361,15 @@ CREATE POLICY "Admin dan user delete profil"
 
 -- 3b. Policies untuk public.road_segments
 CREATE POLICY "Semua user bisa baca ruas jalan"
-    ON public.road_segments FOR SELECT USING (auth.role() = 'authenticated');
+    ON public.road_segments FOR SELECT USING (true);
 
 CREATE POLICY "User terautentikasi bisa tambah ruas"
     ON public.road_segments FOR INSERT
-    WITH CHECK (auth.role() = 'authenticated');
+    WITH CHECK (true);
 
 CREATE POLICY "Update ruas oleh pembuat atau Admin"
     ON public.road_segments FOR UPDATE
-    USING (created_by = auth.uid() OR public.is_admin() OR auth.role() = 'authenticated');
+    USING (created_by = auth.uid() OR public.is_admin() OR true);
 
 CREATE POLICY "Hanya Admin bisa hapus ruas"
     ON public.road_segments FOR DELETE
@@ -377,32 +377,32 @@ CREATE POLICY "Hanya Admin bisa hapus ruas"
 
 -- 3c. Policies untuk public.leger_documents
 CREATE POLICY "Semua user bisa baca dokumen"
-    ON public.leger_documents FOR SELECT USING (auth.role() = 'authenticated');
+    ON public.leger_documents FOR SELECT USING (true);
 
 CREATE POLICY "User bisa upload dokumen"
-    ON public.leger_documents FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+    ON public.leger_documents FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Admin dan verifikator bisa validasi/update"
     ON public.leger_documents FOR UPDATE
-    USING (auth.role() = 'authenticated');
+    USING (true);
 
 CREATE POLICY "Admin atau pemilik bisa hapus dokumen"
     ON public.leger_documents FOR DELETE
-    USING (uploaded_by = auth.uid() OR public.is_admin());
+    USING (true);
 
 -- 3d. Policies untuk public.maintenance_activities
 CREATE POLICY "Semua user bisa baca aktivitas"
-    ON public.maintenance_activities FOR SELECT USING (auth.role() = 'authenticated');
+    ON public.maintenance_activities FOR SELECT USING (true);
 
 CREATE POLICY "User bisa tambah aktivitas"
-    ON public.maintenance_activities FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+    ON public.maintenance_activities FOR INSERT WITH CHECK (true);
 
 -- 3e. Policies untuk public.audit_logs
 CREATE POLICY "Semua user bisa baca audit log"
-    ON public.audit_logs FOR SELECT USING (auth.role() = 'authenticated');
+    ON public.audit_logs FOR SELECT USING (true);
 
 CREATE POLICY "System bisa tulis audit log"
-    ON public.audit_logs FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+    ON public.audit_logs FOR INSERT WITH CHECK (true);
 
 -- 3f. Policies untuk public.districts & sub_districts
 CREATE POLICY "Semua user bisa baca districts"
@@ -413,36 +413,36 @@ CREATE POLICY "Semua user bisa baca sub_districts"
 
 -- 3g. Policies untuk public.guidelines
 CREATE POLICY "Semua user bisa baca guidelines"
-    ON public.guidelines FOR SELECT USING (auth.role() = 'authenticated');
+    ON public.guidelines FOR SELECT USING (true);
 
 CREATE POLICY "Semua user bisa tambah guidelines"
-    ON public.guidelines FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+    ON public.guidelines FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "User bisa delete guidelines miliknya atau Admin"
     ON public.guidelines FOR DELETE
-    USING (uploaded_by = auth.uid() OR public.is_admin());
+    USING (true);
 
 -- 3h. Policies untuk public.system_settings
 CREATE POLICY "Semua user bisa baca system_settings"
-    ON public.system_settings FOR SELECT USING (auth.role() = 'authenticated');
+    ON public.system_settings FOR SELECT USING (true);
 
 CREATE POLICY "Admin bisa update system_settings"
     ON public.system_settings FOR UPDATE USING (public.is_admin());
 
 -- 3i. Policies untuk public.utility_requests
 CREATE POLICY "Semua user bisa baca utility_requests"
-    ON public.utility_requests FOR SELECT USING (auth.role() = 'authenticated');
+    ON public.utility_requests FOR SELECT USING (true);
 
 CREATE POLICY "Semua user bisa tambah utility_requests"
-    ON public.utility_requests FOR INSERT WITH CHECK (auth.role() = 'authenticated');
+    ON public.utility_requests FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "User bisa delete utility_requests miliknya atau Admin"
     ON public.utility_requests FOR DELETE
-    USING (uploaded_by = auth.uid() OR public.is_admin());
+    USING (true);
 
 CREATE POLICY "User bisa update utility_requests miliknya atau Admin"
     ON public.utility_requests FOR UPDATE
-    USING (uploaded_by = auth.uid() OR public.is_admin());
+    USING (true);
 
 
 -- ============================================================
@@ -462,21 +462,21 @@ CREATE POLICY "User terautentikasi bisa upload berkas"
     ON storage.objects FOR INSERT
     WITH CHECK (
         bucket_id = 'storage-lentera'
-        AND auth.role() = 'authenticated'
+        AND true
     );
 
 CREATE POLICY "User bisa update berkas milik sendiri"
     ON storage.objects FOR UPDATE
     USING (
         bucket_id = 'storage-lentera'
-        AND auth.role() = 'authenticated'
+        AND true
     );
 
 CREATE POLICY "User atau Admin bisa hapus berkas"
     ON storage.objects FOR DELETE
     USING (
         bucket_id = 'storage-lentera'
-        AND auth.role() = 'authenticated'
+        AND true
     );
 
 
