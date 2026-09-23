@@ -471,6 +471,51 @@ export const RoadProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const BUCKET = "storage-lentera";
     const storagePath = `documents/${Date.now()}_${file.name.replace(/\s+/g, "_")}`;
 
+    let targetSegmentId = doc.segmentId;
+
+    // ── 0. Auto-sync Dummy Segment ke Database ──
+    if (targetSegmentId.startsWith("seg-")) {
+      const dummySegment = segments.find(s => s.id === targetSegmentId);
+      if (dummySegment) {
+        // Cek apakah sudah ada berdasarkan kode
+        const { data: existingSeg } = await supabase
+          .from("road_segments")
+          .select("id")
+          .eq("code", dummySegment.code)
+          .single();
+
+        if (existingSeg) {
+          targetSegmentId = existingSeg.id;
+        } else {
+          // Insert ke database untuk mendapatkan UUID asli
+          const { data: newSeg, error: insertSegError } = await supabase
+            .from("road_segments")
+            .insert({
+              code: dummySegment.code,
+              name: dummySegment.name,
+              district_name: dummySegment.district,
+              sub_district_name: dummySegment.kecamatan,
+              length_km: dummySegment.lengthKm,
+              width_m: dummySegment.widthM,
+              surface_type: dummySegment.surfaceType,
+              condition: dummySegment.condition,
+              created_by: userId || null
+            })
+            .select("id")
+            .single();
+
+          if (insertSegError) {
+            console.error("[LENTERA] Auto-sync segment error:", insertSegError.message);
+            showToast(`Gagal sinkronisasi ruas jalan: ${insertSegError.message}`, "error");
+            return;
+          }
+          if (newSeg) {
+            targetSegmentId = newSeg.id;
+          }
+        }
+      }
+    }
+
     onProgress?.(20);
 
     const { error: uploadError } = await supabase.storage
@@ -499,7 +544,7 @@ export const RoadProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const { data, error } = await supabase
       .from("leger_documents")
       .insert({
-        segment_id: doc.segmentId,
+        segment_id: targetSegmentId,
         type: doc.type,
         document_no: doc.documentNo,
         file_name: doc.fileName,
