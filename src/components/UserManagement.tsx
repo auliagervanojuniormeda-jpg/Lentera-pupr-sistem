@@ -171,33 +171,58 @@ const UserFormModal: React.FC<UserFormModalProps> = ({
           });
 
         if (signUpError) {
-          setFormError(
-            signUpError.message === "User already registered"
-              ? "Email ini sudah terdaftar dalam sistem."
-              : signUpError.message
-          );
+          let msg = signUpError.message;
+          if (
+            signUpError.message === "User already registered" ||
+            signUpError.message.toLowerCase().includes("already registered")
+          ) {
+            msg = "Email ini sudah terdaftar dalam sistem.";
+          } else if (signUpError.message.toLowerCase().includes("rate limit")) {
+            msg = "Batas frekuensi email Supabase tercapai. Tunggu beberapa saat atau matikan Confirm Email di dashboard Supabase.";
+          }
+          setFormError(msg);
           return;
         }
 
-        if (authData.user) {
-          // ── 2. Update public.users jika sudah ada (dari trigger) ──
-          const { error: upsertErr } = await supabase
-            .from("users")
-            .upsert(
-              {
-                id: authData.user.id,
-                full_name: form.full_name.trim(),
-                email: form.email.trim(),
-                role: form.role,
-                district_assignment: form.district_assignment || null,
-                regional_code: form.regional_code || null,
-                is_active: true,
-              },
-              { onConflict: "id" }
-            );
+        // Cek jika Supabase mendeteksi email duplikat (identities kosong)
+        if (
+          authData.user &&
+          authData.user.identities &&
+          authData.user.identities.length === 0
+        ) {
+          setFormError("Email ini sudah terdaftar dalam sistem. Silakan gunakan email lain.");
+          return;
+        }
 
-          if (upsertErr) {
-            console.error("[UserMgmt] upsert profile error:", upsertErr.message);
+        if (authData.user && (!authData.user.identities || authData.user.identities.length > 0)) {
+          // ── 2. Update public.users jika sudah ada (dari trigger) ──
+          try {
+            const { error: upsertErr } = await supabase
+              .from("users")
+              .upsert(
+                {
+                  id: authData.user.id,
+                  full_name: form.full_name.trim(),
+                  email: form.email.trim(),
+                  role: form.role,
+                  district_assignment: form.district_assignment || null,
+                  regional_code: form.regional_code || null,
+                  is_active: true,
+                },
+                { onConflict: "id" }
+              );
+
+            if (upsertErr) {
+              console.warn("[UserMgmt] Info sync profile:", upsertErr.message);
+              if (upsertErr.message.includes("users_role_check")) {
+                setFormError(
+                  `Role "${form.role}" belum diizinkan oleh database constraint. Jalankan script SQL perbaikan role di Supabase.`
+                );
+                return;
+              }
+            }
+          } catch (err: any) {
+            console.warn("[UserMgmt] Upsert catch:", err.message);
           }
         }
 
